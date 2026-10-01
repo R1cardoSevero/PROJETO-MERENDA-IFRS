@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Registro de Entrega - Merenda Escolar</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="app">
+
+
+    <!-- MENU -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                🍎
+            </div>
+
+            <div>
+
+                <strong>
+                    Merenda Escolar
+                </strong>
+
+                <small>
+                    Campus Viamão
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <nav class="menu">
+
+            <a href="index.html">
+
+                <span>⌂</span>
+                Início
+
+            </a>
+
+
+            <a href="agendamento-lanche.html">
+
+                <span>▣</span>
+                Agendamento de Lanche
+
+            </a>
+
+
+            <a
+                href="registro-entrega.html"
+                class="active">
+
+                <span>🍴</span>
+                Registro de Entrega
+
+            </a>
+
+
+            <a href="#">
+                <span>👥</span>
+                Alunos
+            </a>
+
+
+            <a href="#">
+                <span>▰</span>
+                Turmas
+            </a>
+
+
+            <a href="#">
+                <span>▣</span>
+                Alimentos
+            </a>
+
+
+            <a href="#">
+                <span>▥</span>
+                Relatórios
+            </a>
+
+        </nav>
+
+
+        <div class="menu-bottom">
+
+            <a href="#">
+                <span>⚙</span>
+                Configurações
+            </a>
+
+            <a href="#">
+                <span>↪</span>
+                Sair
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Registro de Entrega
+                </h1>
+
+                <p>
+                    Registre a quantidade efetivamente entregue.
+                </p>
+
+            </div>
+
+
+            <div class="usuario">
+
+                <div class="avatar">
+                    AD
+                </div>
+
+                <div>
+
+                    <strong>
+                        Administrador
+                    </strong>
+
+                    <small>
+                        Campus Viamão
+                    </small>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <section class="content">
+
+
+            <div class="page-header">
+
+                <div>
+
+                    <h2>
+                        Lanche selecionado
+                    </h2>
+
+                    <p>
+                        Confira os dados do agendamento e informe a quantidade entregue.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- LANCHES -->
+
+            <div class="card lanche-selecionado">
+
+                <div class="icone-lanche">
+                    🍴
+                </div>
+
+
+                <div class="info-lanche">
+
+                    <span>
+                        Data
+                    </span>
+
+                    <strong id="entregaData">
+                        26/09/2026
+                    </strong>
+
+                </div>
+
+
+                <div class="separador"></div>
+
+
+                <div class="info-lanche">
+
+                    <span>
+                        Turno
+                    </span>
+
+                    <strong id="entregaTurno">
+                        Manhã
+                    </strong>
+
+                </div>
+
+
+                <div class="separador"></div>
+
+
+                <div class="info-lanche maior">
+
+                    <span>
+                        Tipo de lanche
+                    </span>
+
+                    <strong id="entregaLanche">
+                        Pastel de frango + suco
+                    </strong>
+
+                </div>
+
+
+                <div class="previsto">
+
+                    <span>
+                        Quantidade prevista
+                    </span>
+
+                    <strong id="quantidadePrevista">
+                        120
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- REGISTRO -->
+
+            <div class="card">
+
+                <div class="registro-grid">
+
+
+                    <div class="campo">
+
+                        <label>
+                            Quantidade entregue *
+                        </label>
+
+                        <input
+                            type="number"
+                            id="quantidadeEntregue"
+                            min="0"
+                            placeholder="Ex.: 120">
+
+                        <small>
+                            Informe somente a quantidade efetivamente entregue.
+                        </small>
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label>
+                            Observação
+                        </label>
+
+                        <input
+                            type="text"
+                            id="observacaoEntrega"
+                            placeholder="Opcional">
+
+                    </div>
+
+
+                    <div class="campo botao-registro">
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="registrarEntrega()">
+
+                            ✓ Registrar entrega
+
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- HISTÓRICO -->
+
+            <div class="card">
+
+                <div class="table-header">
+
+                    <div>
+
+                        <h3>
+                            Histórico de entregas
+                        </h3>
+
+                        <p>
+                            Registros realizados para cada tipo de lanche.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Data
+                                </th>
+
+                                <th>
+                                    Turno
+                                </th>
+
+                                <th>
+                                    Lanche
+                                </th>
+
+                                <th>
+                                    Prevista
+                                </th>
+
+                                <th>
+                                    Entregue
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Ações
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="historicoEntrega">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<div
+    id="toast"
+    class="toast">
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
