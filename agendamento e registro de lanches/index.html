@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merenda Escolar · IFRS Campus Viamão</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300..600,0..1,0&display=block">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="marca">
+            <div class="marca-icone"><span class="icone">restaurant</span></div>
+            <div>
+                <strong>Merenda Escolar</strong>
+                <small>IFRS · Campus Viamão</small>
+            </div>
+        </div>
+
+        <nav class="menu">
+            <a href="#inicio"><span class="icone">space_dashboard</span>Início</a>
+
+            <p class="menu-grupo">Merenda</p>
+            <a href="#agendamento"><span class="icone">calendar_month</span>Agendamento de lanches</a>
+            <a href="#entrega-lanche"><span class="icone">fact_check</span>Entrega de lanches</a>
+            <a href="#cardapios"><span class="icone">menu_book</span>Cardápios</a>
+            <a href="#lanches"><span class="icone">lunch_dining</span>Lanches</a>
+
+            <p class="menu-grupo">Estoque</p>
+            <a href="#alimentos"><span class="icone">nutrition</span>Alimentos</a>
+            <a href="#produtos"><span class="icone">inventory_2</span>Produtos</a>
+
+            <p class="menu-grupo">Compras</p>
+            <a href="#fornecedores"><span class="icone">storefront</span>Fornecedores</a>
+            <a href="#empenhos"><span class="icone">receipt_long</span>Empenhos</a>
+            <a href="#agenda-empenho"><span class="icone">local_shipping</span>Entregas de empenho</a>
+            <a href="#recebimento"><span class="icone">move_to_inbox</span>Recebimento</a>
+        </nav>
+
+        <div class="sidebar-rodape">
+            <a href="#inicio"><span class="icone">logout</span>Sair</a>
+        </div>
+    </aside>
+
+    <div class="sobreposicao" onclick="alternarMenu()"></div>
+
+    <div class="principal">
+
+        <header class="topo">
+            <button class="btn-icone btn-menu" onclick="alternarMenu()"><span class="icone">menu</span></button>
+            <div class="trilha">
+                <span id="trilha-grupo"></span>
+                <span class="icone">chevron_right</span>
+                <strong id="trilha-pagina"></strong>
+            </div>
+            <div class="topo-acoes">
+                <div class="data-hoje"><span class="icone">today</span><span id="data-hoje"></span></div>
+                <button class="btn-icone notificacao"><span class="icone">notifications</span><i></i></button>
+                <div class="usuario">
+                    <div class="avatar">AD</div>
+                    <div class="usuario-info">
+                        <strong>Administrador</strong>
+                        <small>Setor de Alimentação</small>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="conteudo">
+
+            <section class="pagina" data-pagina="inicio">
+                <div class="boas-vindas">
+                    <div>
+                        <span class="sobretitulo" id="inicio-data"></span>
+                        <h1>Olá, Administrador</h1>
+                        <p>Acompanhe os lanches do dia, as entregas dos fornecedores e o estoque da merenda.</p>
+                    </div>
+                    <div class="boas-vindas-acoes">
+                        <a class="btn btn-claro" href="#agendamento"><span class="icone">calendar_month</span>Ver agenda</a>
+                        <a class="btn btn-destaque" href="#entrega-lanche"><span class="icone">fact_check</span>Registrar entrega</a>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-icone verde"><span class="icone">lunch_dining</span></div>
+                        <div><span>Lanches previstos hoje</span><strong id="stat-lanches"></strong><small id="stat-lanches-info"></small></div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icone azul"><span class="icone">local_shipping</span></div>
+                        <div><span>Entregas pendentes</span><strong id="stat-entregas"></strong><small>solicitadas aos fornecedores</small></div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icone laranja"><span class="icone">warning</span></div>
+                        <div><span>Produtos em falta</span><strong id="stat-abaixo"></strong><small>para a próxima semana</small></div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icone roxo"><span class="icone">receipt_long</span></div>
+                        <div><span>Empenhos vigentes</span><strong id="stat-empenhos"></strong><small id="stat-empenhos-info"></small></div>
+                    </div>
+                </div>
+
+                <div class="grade-2">
+                    <div class="card">
+                        <div class="card-topo">
+                            <div><h3>Lanches de hoje</h3><p>Programação por turno</p></div>
+                            <a class="link" href="#agendamento">Ver semana</a>
+                        </div>
+                        <ul class="lista" id="inicio-lanches"></ul>
+                    </div>
+                    <div class="card">
+                        <div class="card-topo">
+                            <div><h3>Próximas entregas</h3><p>Solicitações feitas aos fornecedores</p></div>
+                            <a class="link" href="#agenda-empenho">Ver todas</a>
+                        </div>
+                        <ul class="lista" id="inicio-entregas"></ul>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-topo">
+                        <div><h3>Estoque dos produtos</h3><p>Disponível em relação ao total provisionado nos empenhos vigentes</p></div>
+                        <a class="link" href="#produtos">Ver produtos</a>
+                    </div>
+                    <div class="estoque-grade" id="inicio-estoque"></div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="agendamento">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Agendamento de lanches</h1>
+                        <p>Programe os lanches de cada dia e turno. Mais de um lanche no mesmo turno vira opção de escolha para os estudantes.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-agendamento"><span class="icone">add</span>Agendar lanche</button>
+                </div>
+
+                <div class="card">
+                    <div class="semana-barra">
+                        <div class="semana-nav">
+                            <button class="btn-icone" onclick="mudarSemana(-1)"><span class="icone">chevron_left</span></button>
+                            <strong id="semana-titulo"></strong>
+                            <button class="btn-icone" onclick="mudarSemana(1)"><span class="icone">chevron_right</span></button>
+                            <button class="btn btn-fantasma btn-pequeno" onclick="mudarSemana(0)">Semana atual</button>
+                        </div>
+                        <div class="legenda">
+                            <span><i class="ponto agendado"></i>Agendado</span>
+                            <span><i class="ponto entregue"></i>Entregue</span>
+                        </div>
+                    </div>
+                    <div class="semana" id="semana"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-topo">
+                        <div>
+                            <h3>Previsão de produtos</h3>
+                            <p>Quantidade necessária para a semana de <span id="previsao-periodo"></span>, comparada ao estoque e ao saldo dos empenhos</p>
+                        </div>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Produto</th><th class="num">Necessário</th><th class="num">Em estoque</th><th class="num">Saldo em empenho</th><th>Situação</th><th></th></tr>
+                            </thead>
+                            <tbody id="tabela-necessidade"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="entrega-lanche">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Entrega de lanches</h1>
+                        <p>Registre o que foi efetivamente entregue aos estudantes e acompanhe a sobra de cada lanche.</p>
+                    </div>
+                </div>
+
+                <div class="entrega-layout">
+                    <div class="card entrega-lateral">
+                        <label class="campo"><span>Data</span><input type="date" id="entrega-data" onchange="renderEntregaLista()"></label>
+                        <div class="entrega-lista" id="entrega-lista"></div>
+                    </div>
+                    <div class="card" id="entrega-detalhe"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-topo">
+                        <div><h3>Histórico de entregas</h3><p>Lanches já entregues e sobra calculada (previsto − entregue)</p></div>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Data</th><th>Turno</th><th>Lanche</th><th class="num">Previstos</th><th class="num">Entregues</th><th class="num">Sobra</th><th>Aproveitamento</th></tr>
+                            </thead>
+                            <tbody id="tabela-historico"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="cardapios">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Cardápios</h1>
+                        <p>Combinações de alimentos com a quantidade expressa na unidade base de cada alimento.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-cardapio"><span class="icone">add</span>Novo cardápio</button>
+                </div>
+                <div class="cartoes" id="lista-cardapios"></div>
+            </section>
+
+            <section class="pagina" data-pagina="lanches">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Lanches</h1>
+                        <p>Cada lanche define exatamente quais produtos serão entregues e de que forma.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-lanche"><span class="icone">add</span>Novo lanche</button>
+                </div>
+
+                <div class="referencias">
+                    <div><span class="ref ref-inteiro">Inteiro</span><p>Quantidade do produto inteiro: 1 caixa, 2 pastéis, ¼ de cuca.</p></div>
+                    <div><span class="ref ref-base">Unidade base</span><p>Na unidade do alimento: 0,2 L de suco, 0,3 Kg de banana.</p></div>
+                    <div><span class="ref ref-subitens">Subitens</span><p>Partes do produto: 4 biscoitos de um pacote com 40.</p></div>
+                </div>
+
+                <div class="cartoes" id="lista-lanches"></div>
+            </section>
+
+            <section class="pagina" data-pagina="alimentos">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Alimentos</h1>
+                        <p>Cadastro genérico dos alimentos que compõem os cardápios.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-alimento"><span class="icone">add</span>Novo alimento</button>
+                </div>
+
+                <div class="card" data-filtragem>
+                    <div class="card-barra">
+                        <label class="busca"><span class="icone">search</span><input type="search" placeholder="Buscar alimento"></label>
+                        <div class="chips">
+                            <button class="ativo" data-filtro="">Todos</button>
+                            <button data-filtro="Comida">Comida</button>
+                            <button data-filtro="Bebida">Bebida</button>
+                        </div>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Alimento</th><th>Natureza</th><th>Grupo</th><th>Unidade base</th><th class="num">Produtos</th><th></th></tr>
+                            </thead>
+                            <tbody id="tabela-alimentos" data-itens></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="produtos">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Produtos</h1>
+                        <p>Apresentações concretas dos alimentos, com embalagem, subitens e estoque.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-produto"><span class="icone">add</span>Novo produto</button>
+                </div>
+
+                <div class="card" data-filtragem>
+                    <div class="card-barra">
+                        <label class="busca"><span class="icone">search</span><input type="search" placeholder="Buscar produto"></label>
+                        <div class="chips">
+                            <button class="ativo" data-filtro="">Todos</button>
+                            <button data-filtro="Comida">Comida</button>
+                            <button data-filtro="Bebida">Bebida</button>
+                        </div>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Produto</th><th>Quant. unitária base</th><th>Subitens</th><th>Estoque disponível</th><th class="num">Provisionado</th><th></th></tr>
+                            </thead>
+                            <tbody id="tabela-produtos" data-itens></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="fornecedores">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Fornecedores</h1>
+                        <p>Empresas com contrato de empenho firmado com o campus.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-fornecedor"><span class="icone">add</span>Novo fornecedor</button>
+                </div>
+
+                <div class="card" data-filtragem>
+                    <div class="card-barra">
+                        <label class="busca"><span class="icone">search</span><input type="search" placeholder="Buscar por nome ou CNPJ"></label>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Fornecedor</th><th>CNPJ</th><th>Telefone</th><th>Empenhos</th><th></th></tr>
+                            </thead>
+                            <tbody id="tabela-fornecedores" data-itens></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="empenhos">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Empenhos</h1>
+                        <p>Contratos informados pelo setor de compras, com os itens e quantidades empenhadas.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-empenho"><span class="icone">add</span>Registrar empenho</button>
+                </div>
+
+                <div data-filtragem>
+                    <div class="barra-solta">
+                        <label class="busca"><span class="icone">search</span><input type="search" placeholder="Buscar empenho, fornecedor ou produto"></label>
+                        <div class="chips">
+                            <button class="ativo" data-filtro="">Todos</button>
+                            <button data-filtro="vigente">Vigentes</button>
+                            <button data-filtro="encerrado">Encerrados</button>
+                        </div>
+                    </div>
+                    <div id="lista-empenhos" data-itens></div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="agenda-empenho">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Entregas de empenho</h1>
+                        <p>Solicitações de entrega feitas aos fornecedores a partir do saldo dos empenhos.</p>
+                    </div>
+                    <button class="btn btn-primario" data-modal="modal-agenda-empenho"><span class="icone">add</span>Solicitar entrega</button>
+                </div>
+
+                <div class="card" data-filtragem>
+                    <div class="card-barra">
+                        <label class="busca"><span class="icone">search</span><input type="search" placeholder="Buscar solicitação"></label>
+                        <div class="chips">
+                            <button class="ativo" data-filtro="">Todas</button>
+                            <button data-filtro="agendado">Agendadas</button>
+                            <button data-filtro="entrega_parcial">Parciais</button>
+                            <button data-filtro="entrega_total">Totais</button>
+                            <button data-filtro="finalizado">Finalizadas</button>
+                        </div>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Empenho</th><th>Produto</th><th>Solicitado em</th><th>Previsto para</th><th class="num">Solicitado</th><th class="num">Entregue</th><th>Situação</th><th></th></tr>
+                            </thead>
+                            <tbody id="tabela-agenda-empenho" data-itens></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pagina" data-pagina="recebimento">
+                <div class="pagina-topo">
+                    <div>
+                        <h1>Recebimento de produtos</h1>
+                        <p>Confirme as entregas feitas pelos fornecedores. O estoque disponível é atualizado com a quantidade recebida.</p>
+                    </div>
+                </div>
+
+                <div class="recebimentos" id="lista-recebimento"></div>
+
+                <div class="card">
+                    <div class="card-topo">
+                        <div><h3>Recebimentos recentes</h3><p>Entregas já registradas no sistema</p></div>
+                    </div>
+                    <div class="tabela-wrap tabela-embutida">
+                        <table class="tabela">
+                            <thead>
+                                <tr><th>Recebido em</th><th>Produto</th><th>Empenho</th><th class="num">Solicitado</th><th class="num">Recebido</th><th>Situação</th></tr>
+                            </thead>
+                            <tbody id="tabela-recebidos"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <dialog class="modal" id="modal-agendamento">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Agendar lanche</h2><p>Escolha o dia, o turno e o lanche que será servido.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo"><span>Data</span><input type="date" value="2026-10-05"></label>
+                    <div class="campo">
+                        <span>Turno</span>
+                        <div class="segmentado">
+                            <label><input type="radio" name="turno-agendamento" checked><span>Manhã</span></label>
+                            <label><input type="radio" name="turno-agendamento"><span>Tarde</span></label>
+                        </div>
+                    </div>
+                    <label class="campo campo-largo"><span>Lanche</span><select data-opcoes="lanches"></select></label>
+                    <label class="campo"><span>Quantidade prevista</span><input type="number" min="1" placeholder="Ex.: 140"></label>
+                    <label class="campo"><span>Situação</span><input type="text" value="Agendado" disabled></label>
+                    <label class="campo campo-largo"><span>Observações</span><textarea rows="3" placeholder="Opcional"></textarea></label>
+                    <div class="dica campo-largo"><span class="icone">lightbulb</span><p>Para oferecer duas opções no mesmo turno, agende outro lanche com a mesma data e turno.</p></div>
+                </div>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Lanche agendado">Salvar agendamento</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="modal-cardapio">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Cardápio</h2><p>Monte a lista de alimentos e a quantidade de cada um.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo campo-largo"><span>Nome</span><input type="text" placeholder="Ex.: Banana, biscoito e leite"></label>
+                    <label class="campo campo-largo"><span>Descrição</span><input type="text" placeholder="Opcional"></label>
+                </div>
+                <div class="itens-titulo"><h4>Itens de alimento</h4><span>Quantidade na unidade base do alimento</span></div>
+                <div class="itens-form">
+                    <div class="linha-item">
+                        <label class="campo"><span>Alimento</span><select data-opcoes="alimentos"></select></label>
+                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 0,25"></label>
+                        <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
+                    </div>
+                    <div class="linha-item">
+                        <label class="campo"><span>Alimento</span><select data-opcoes="alimentos"></select></label>
+                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 0,25"></label>
+                        <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
+                    </div>
+                </div>
+                <button type="button" class="btn-adicionar" data-adicionar><span class="icone">add</span>Adicionar item</button>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Cardápio salvo">Salvar cardápio</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal modal-largo" id="modal-lanche">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Lanche</h2><p>Defina os produtos que serão entregues a partir de um cardápio.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo"><span>Cardápio</span><select data-opcoes="cardapios"></select></label>
+                    <label class="campo"><span>Descrição</span><input type="text" placeholder="Ex.: Pastel + suco em caixinha"></label>
+                </div>
+                <div class="itens-titulo"><h4>Itens do lanche</h4><span>Produto e forma de consumo</span></div>
+                <div class="itens-form">
+                    <div class="linha-item lanche">
+                        <label class="campo"><span>Produto</span><select data-opcoes="produtos"></select></label>
+                        <label class="campo"><span>Referência</span><select><option>Inteiro</option><option>Unidade base</option><option>Subitens</option></select></label>
+                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 1"></label>
+                        <label class="campo"><span>Conversão</span><input type="number" min="1" placeholder="Auto"></label>
+                        <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
+                    </div>
+                    <div class="linha-item lanche">
+                        <label class="campo"><span>Produto</span><select data-opcoes="produtos"></select></label>
+                        <label class="campo"><span>Referência</span><select><option>Inteiro</option><option>Unidade base</option><option>Subitens</option></select></label>
+                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 1"></label>
+                        <label class="campo"><span>Conversão</span><input type="number" min="1" placeholder="Auto"></label>
+                        <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
+                    </div>
+                </div>
+                <button type="button" class="btn-adicionar" data-adicionar><span class="icone">add</span>Adicionar item</button>
+                <div class="dica"><span class="icone">info</span><p>A conversão só é usada em subitens. Deixe em branco para usar a quantidade de subitens cadastrada no produto.</p></div>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Lanche salvo">Salvar lanche</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="modal-alimento">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Alimento</h2><p>Entidade genérica usada na montagem dos cardápios.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo campo-largo"><span>Nome</span><input type="text" placeholder="Ex.: Banana"></label>
+                    <label class="campo campo-largo"><span>Descrição</span><input type="text" placeholder="Ex.: Banana prata"></label>
+                    <div class="campo">
+                        <span>Natureza</span>
+                        <div class="segmentado">
+                            <label><input type="radio" name="natureza" checked><span>Comida</span></label>
+                            <label><input type="radio" name="natureza"><span>Bebida</span></label>
+                        </div>
+                    </div>
+                    <label class="campo">
+                        <span>Grupo alimentar</span>
+                        <select><option>Fruta</option><option>Panifício</option><option>Laticínio</option><option>Suco</option><option>Cereal</option><option>Outro</option></select>
+                    </label>
+                    <label class="campo">
+                        <span>Unidade de medida base</span>
+                        <select><option>Quilograma (Kg)</option><option>Grama (g)</option><option>Litro (L)</option><option>Mililitro (mL)</option><option>Unidade (un)</option><option>Dúzia (dz)</option></select>
+                    </label>
+                </div>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Alimento salvo">Salvar alimento</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="modal-produto">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Produto</h2><p>Apresentação concreta de um alimento adquirido.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo"><span>Alimento</span><select data-opcoes="alimentos"></select></label>
+                    <label class="campo">
+                        <span>Embalagem</span>
+                        <select><option>Unidade (un)</option><option>Pacote (pct)</option><option>Caixa (cx)</option><option>Garrafa (gf)</option><option>Saco (sc)</option><option>Quilo (kg)</option></select>
+                    </label>
+                    <label class="campo campo-largo"><span>Descrição</span><input type="text" placeholder="Ex.: Pacote 400g"></label>
+                    <label class="campo"><span>Quantidade unitária base</span><span class="input-sufixo"><input type="number" step="0.01" min="0" placeholder="0,4"><em>Kg</em></span></label>
+                    <label class="campo"><span>Estoque atual</span><input type="number" min="0" placeholder="0"></label>
+                    <label class="campo"><span>Quantidade de subitens</span><input type="number" min="0" placeholder="Ex.: 40"></label>
+                    <label class="campo"><span>Nome do subitem</span><input type="text" placeholder="Ex.: biscoitos"></label>
+                    <div class="dica campo-largo"><span class="icone">lightbulb</span><p>Um pacote de biscoito de 400g tem quantidade unitária base 0,4 Kg e aproximadamente 40 subitens.</p></div>
+                </div>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Produto salvo">Salvar produto</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="modal-fornecedor">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Fornecedor</h2><p>Empresa com contrato de empenho firmado.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo campo-largo"><span>Razão social</span><input type="text" placeholder="Ex.: Padaria Pão do Campo Ltda"></label>
+                    <label class="campo"><span>CNPJ</span><input type="text" placeholder="00.000.000/0000-00"></label>
+                    <label class="campo"><span>Telefone</span><input type="tel" placeholder="(51) 0000-0000"></label>
+                    <label class="campo campo-largo"><span>E-mail</span><input type="email" placeholder="contato@empresa.com.br"></label>
+                </div>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Fornecedor salvo">Salvar fornecedor</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="modal-empenho">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Empenho</h2><p>Lance o contrato informado pelo setor de compras.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo"><span>Número do empenho</span><input type="text" placeholder="Ex.: 2026NE000106"></label>
+                    <label class="campo"><span>Fornecedor</span><select data-opcoes="fornecedores"></select></label>
+                    <label class="campo"><span>Data inicial</span><input type="date"></label>
+                    <label class="campo"><span>Data final</span><input type="date"></label>
+                </div>
+                <div class="itens-titulo"><h4>Itens empenhados</h4><span>Esses itens entram no estoque provisionado</span></div>
+                <div class="itens-form">
+                    <div class="linha-item">
+                        <label class="campo"><span>Produto</span><select data-opcoes="produtos"></select></label>
+                        <label class="campo"><span>Quantidade empenhada</span><input type="number" min="0" placeholder="Ex.: 1000"></label>
+                        <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
+                    </div>
+                </div>
+                <button type="button" class="btn-adicionar" data-adicionar><span class="icone">add</span>Adicionar item</button>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Empenho registrado">Salvar empenho</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="modal-agenda-empenho">
+        <form method="dialog">
+            <header class="modal-topo">
+                <div><h2>Solicitar entrega</h2><p>Agende a entrega de um item do empenho com o fornecedor.</p></div>
+                <button type="button" class="btn-icone" data-fechar><span class="icone">close</span></button>
+            </header>
+            <div class="modal-corpo">
+                <div class="campos">
+                    <label class="campo campo-largo"><span>Empenho</span><select data-opcoes="empenhos"></select></label>
+                    <label class="campo campo-largo"><span>Produto</span><select data-opcoes="produtos"></select></label>
+                    <label class="campo"><span>Quantidade solicitada</span><input type="number" min="1" placeholder="Ex.: 300"></label>
+                    <label class="campo"><span>Data prevista de entrega</span><input type="date"></label>
+                    <label class="campo campo-largo"><span>Observação</span><textarea rows="2" placeholder="Opcional"></textarea></label>
+                    <div class="dica campo-largo"><span class="icone">info</span><p>A data da solicitação é registrada automaticamente e o estado inicial é “Agendado”.</p></div>
+                </div>
+            </div>
+            <footer class="modal-rodape">
+                <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
+                <button class="btn btn-primario" data-toast="Entrega solicitada">Solicitar entrega</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <div class="toast" id="toast"><span class="icone">check_circle</span><span id="toast-texto"></span></div>
+
+    <script src="js/dados.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
