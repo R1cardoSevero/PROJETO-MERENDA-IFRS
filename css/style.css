@@ -1,32 +1,39 @@
 :root {
-    --verde-950: #0a2a1f;
-    --verde-900: #0f3a2b;
-    --verde-800: #134c37;
-    --verde-700: #176446;
-    --verde-600: #1d8258;
-    --verde-500: #27a06c;
-    --verde-100: #dff2e8;
-    --verde-50: #f0f8f3;
-    --laranja-600: #c9640c;
-    --laranja-500: #ef8a22;
-    --laranja-100: #fdecd7;
-    --azul-600: #2560c4;
-    --azul-100: #e2ebfa;
+    --azul-escuro: #375F90;
+    --azul-vibrante: #1F84CD;
+    --laranja-queimado: #D86608;
+    --laranja-vivo: #EA6C11;
+    --cinza-claro: #F3F3F3;
+    --azul-950: #1c3250;
+    --azul-900: #25426a;
+    --azul-800: #2d5180;
+    --azul-700: var(--azul-escuro);
+    --azul-600: var(--azul-vibrante);
+    --azul-500: #4499d8;
+    --azul-texto: #1668a6;
+    --azul-100: #e1eef9;
+    --azul-50: #f0f6fc;
+    --ardosia-100: #e4eaf2;
+    --laranja-700: #a94f06;
+    --laranja-600: var(--laranja-queimado);
+    --laranja-500: var(--laranja-vivo);
+    --laranja-100: #fdeadb;
+    --sucesso: #2e9e6b;
+    --sucesso-texto: #1f7a50;
+    --sucesso-100: #dff2e8;
     --vermelho-600: #c63737;
     --vermelho-100: #fae3e3;
-    --roxo-600: #6c45c2;
-    --roxo-100: #ece5fa;
-    --fundo: #f2f5f2;
+    --fundo: var(--cinza-claro);
     --superficie: #ffffff;
-    --superficie-2: #f7f9f7;
-    --borda: #e1e7e2;
-    --borda-forte: #cbd5cd;
-    --texto: #17251e;
-    --texto-2: #56665e;
-    --texto-3: #87958e;
+    --superficie-2: #f7f9fb;
+    --borda: #e2e7ed;
+    --borda-forte: #cad3dd;
+    --texto: #26384A;
+    --texto-2: #5a6b7e;
+    --texto-3: #8794a4;
     --raio: 14px;
-    --sombra: 0 1px 2px rgba(15, 40, 28, .05), 0 6px 18px rgba(15, 40, 28, .04);
-    --sombra-forte: 0 24px 60px rgba(8, 28, 20, .22);
+    --sombra: 0 1px 2px rgba(28, 45, 70, .05), 0 6px 18px rgba(28, 45, 70, .05);
+    --sombra-forte: 0 24px 60px rgba(15, 28, 46, .22);
     --sidebar: 264px;
 }
 
@@ -62,7 +69,7 @@ textarea {
 }
 
 :focus-visible {
-    outline: 2px solid var(--verde-500);
+    outline: 2px solid var(--azul-500);
     outline-offset: 2px;
 }
 
@@ -90,15 +97,31 @@ textarea {
     display: flex;
     flex-direction: column;
     color: #fff;
-    background: linear-gradient(180deg, var(--verde-900) 0%, var(--verde-950) 100%);
+    background: linear-gradient(180deg, var(--azul-700) 0%, var(--azul-900) 100%);
     transition: transform .25s ease;
+}
+
+.marca-logo {
+    display: flex;
+    align-items: center;
+    height: 64px;
+    padding: 0 12px;
+    background: var(--superficie);
+    border-bottom: 1px solid var(--borda);
+}
+
+.marca-logo img {
+    display: block;
+    height: 100%;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .marca {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 22px 20px 18px;
+    padding: 20px 20px 10px;
 }
 
 .marca-icone {
@@ -107,8 +130,8 @@ textarea {
     border-radius: 12px;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, var(--laranja-500), #f4a852);
-    box-shadow: 0 6px 16px rgba(239, 138, 34, .35);
+    background: linear-gradient(135deg, var(--laranja-500), #f39a52);
+    box-shadow: 0 6px 16px rgba(234, 108, 17, .35);
 }
 
 .marca-icone .icone {
@@ -195,7 +218,7 @@ textarea {
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: rgba(6, 20, 14, .45);
+    background: rgba(15, 28, 46, .45);
     opacity: 0;
     pointer-events: none;
     transition: opacity .25s;
@@ -264,7 +287,7 @@ textarea {
 
 .data-hoje .icone {
     font-size: 18px;
-    color: var(--verde-600);
+    color: var(--azul-texto);
 }
 
 .notificacao {
@@ -298,8 +321,8 @@ textarea {
     place-items: center;
     font-size: 13px;
     font-weight: 700;
-    color: var(--verde-700);
-    background: var(--verde-100);
+    color: var(--azul-700);
+    background: var(--azul-100);
 }
 
 .usuario strong {
@@ -369,9 +392,9 @@ textarea {
     border-radius: 18px;
     color: #fff;
     background:
-        radial-gradient(circle at 92% -20%, rgba(239, 138, 34, .45) 0, transparent 38%),
-        radial-gradient(circle at 70% 140%, rgba(39, 160, 108, .55) 0, transparent 45%),
-        linear-gradient(135deg, var(--verde-800), var(--verde-600));
+        radial-gradient(circle at 92% -20%, rgba(234, 108, 17, .45) 0, transparent 38%),
+        radial-gradient(circle at 70% 140%, rgba(31, 132, 205, .55) 0, transparent 45%),
+        linear-gradient(135deg, var(--azul-800), var(--azul-600));
     box-shadow: var(--sombra);
 }
 
@@ -430,11 +453,11 @@ textarea {
 
 .btn-primario {
     color: #fff;
-    background: var(--verde-600);
+    background: var(--azul-700);
 }
 
 .btn-primario:hover {
-    background: var(--verde-700);
+    background: var(--azul-800);
 }
 
 .btn-destaque {
@@ -510,15 +533,15 @@ textarea {
 }
 
 .btn-mini:hover {
-    color: var(--verde-700);
-    border-color: var(--verde-500);
-    background: var(--verde-50);
+    color: var(--azul-700);
+    border-color: var(--azul-500);
+    background: var(--azul-50);
 }
 
 .link {
     font-size: 13px;
     font-weight: 600;
-    color: var(--verde-600);
+    color: var(--azul-700);
     text-decoration: none;
     white-space: nowrap;
 }
@@ -609,10 +632,10 @@ textarea {
     font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-.stat-icone.verde { color: var(--verde-700); background: var(--verde-100); }
-.stat-icone.azul { color: var(--azul-600); background: var(--azul-100); }
-.stat-icone.laranja { color: var(--laranja-600); background: var(--laranja-100); }
-.stat-icone.roxo { color: var(--roxo-600); background: var(--roxo-100); }
+.stat-icone.azul { color: var(--azul-texto); background: var(--azul-100); }
+.stat-icone.ardosia { color: var(--azul-700); background: var(--ardosia-100); }
+.stat-icone.laranja { color: var(--laranja-700); background: var(--laranja-100); }
+.stat-icone.verde { color: var(--sucesso-texto); background: var(--sucesso-100); }
 
 .stat span {
     font-size: 13px;
@@ -703,8 +726,8 @@ textarea {
     font-size: 16px;
 }
 
-.turno-tag.manha { color: var(--laranja-600); background: var(--laranja-100); }
-.turno-tag.tarde { color: var(--azul-600); background: var(--azul-100); }
+.turno-tag.manha { color: var(--laranja-700); background: var(--laranja-100); }
+.turno-tag.tarde { color: var(--azul-texto); background: var(--azul-100); }
 
 .data-bloco {
     width: 46px;
@@ -734,8 +757,8 @@ textarea {
 
 .data-bloco.hoje {
     color: #fff;
-    border-color: var(--verde-600);
-    background: var(--verde-600);
+    border-color: var(--azul-texto);
+    background: var(--azul-600);
 }
 
 .data-bloco.hoje span {
@@ -777,7 +800,7 @@ textarea {
     height: 8px;
     border-radius: 99px;
     overflow: hidden;
-    background: #e9efea;
+    background: #e6ebf1;
 }
 
 .barra i {
@@ -786,7 +809,7 @@ textarea {
     border-radius: 99px;
 }
 
-.barra .ok { background: var(--verde-500); }
+.barra .ok { background: var(--sucesso); }
 .barra .atencao { background: var(--laranja-500); }
 .barra .critico { background: var(--vermelho-600); }
 
@@ -829,11 +852,11 @@ textarea {
     background: currentColor;
 }
 
-.badge-verde { color: var(--verde-700); background: var(--verde-100); }
-.badge-azul { color: var(--azul-600); background: var(--azul-100); }
-.badge-laranja { color: var(--laranja-600); background: var(--laranja-100); }
+.badge-verde { color: var(--sucesso-texto); background: var(--sucesso-100); }
+.badge-azul { color: var(--azul-texto); background: var(--azul-100); }
+.badge-laranja { color: var(--laranja-700); background: var(--laranja-100); }
 .badge-vermelho { color: var(--vermelho-600); background: var(--vermelho-100); }
-.badge-cinza { color: var(--texto-2); background: #edf0ee; }
+.badge-cinza { color: var(--texto-2); background: #eceff3; }
 
 .busca {
     display: flex;
@@ -860,9 +883,9 @@ textarea {
 }
 
 .busca:focus-within {
-    border-color: var(--verde-500);
+    border-color: var(--azul-500);
     background: var(--superficie);
-    box-shadow: 0 0 0 3px rgba(39, 160, 108, .14);
+    box-shadow: 0 0 0 3px rgba(31, 132, 205, .14);
 }
 
 .barra-solta .busca {
@@ -895,8 +918,8 @@ textarea {
 
 .chips button.ativo {
     color: #fff;
-    border-color: var(--verde-900);
-    background: var(--verde-900);
+    border-color: var(--azul-700);
+    background: var(--azul-700);
 }
 
 .tabela-wrap {
@@ -954,7 +977,7 @@ textarea {
 }
 
 .tabela tbody tr:hover {
-    background: #fafcfa;
+    background: #f9fbfd;
 }
 
 .tabela td strong {
@@ -1012,12 +1035,12 @@ textarea {
     border-radius: 10px;
     font-size: 12.5px;
     font-weight: 700;
-    color: var(--verde-700);
-    background: var(--verde-100);
+    color: var(--azul-700);
+    background: var(--azul-100);
 }
 
-.avatar-item.comida { color: var(--laranja-600); background: var(--laranja-100); }
-.avatar-item.bebida { color: var(--azul-600); background: var(--azul-100); }
+.avatar-item.comida { color: var(--laranja-700); background: var(--laranja-100); }
+.avatar-item.bebida { color: var(--azul-texto); background: var(--azul-100); }
 
 .avatar-item .icone {
     font-size: 20px;
@@ -1082,7 +1105,7 @@ textarea {
 }
 
 .ponto.agendado { background: var(--azul-600); }
-.ponto.entregue { background: var(--verde-500); }
+.ponto.entregue { background: var(--sucesso); }
 
 .semana {
     display: grid;
@@ -1103,9 +1126,9 @@ textarea {
 }
 
 .dia.hoje {
-    border-color: var(--verde-500);
-    background: var(--verde-50);
-    box-shadow: 0 0 0 3px rgba(39, 160, 108, .1);
+    border-color: var(--azul-500);
+    background: var(--azul-50);
+    box-shadow: 0 0 0 3px rgba(31, 132, 205, .1);
 }
 
 .dia-topo {
@@ -1137,7 +1160,7 @@ textarea {
     font-style: normal;
     font-weight: 700;
     color: #fff;
-    background: var(--verde-600);
+    background: var(--azul-600);
 }
 
 .turno h4 {
@@ -1169,7 +1192,7 @@ textarea {
 }
 
 .lanche-chip.entregue {
-    border-left-color: var(--verde-500);
+    border-left-color: var(--sucesso);
 }
 
 .lanche-chip strong {
@@ -1224,8 +1247,8 @@ textarea {
 
 .add-lanche:hover,
 .btn-adicionar:hover {
-    color: var(--verde-700);
-    border-color: var(--verde-500);
+    color: var(--azul-700);
+    border-color: var(--azul-500);
     background: var(--superficie);
 }
 
@@ -1267,9 +1290,9 @@ textarea {
 }
 
 .opcao-agendado.selecionado {
-    border-color: var(--verde-500);
-    background: var(--verde-50);
-    box-shadow: 0 0 0 3px rgba(39, 160, 108, .12);
+    border-color: var(--azul-500);
+    background: var(--azul-50);
+    box-shadow: 0 0 0 3px rgba(31, 132, 205, .12);
 }
 
 .opcao-info {
@@ -1287,7 +1310,7 @@ textarea {
 }
 
 .status-ok {
-    color: var(--verde-500);
+    color: var(--sucesso);
     font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
@@ -1309,7 +1332,7 @@ textarea {
     display: grid;
     place-items: center;
     border-radius: 13px;
-    color: var(--laranja-600);
+    color: var(--laranja-700);
     background: var(--laranja-100);
 }
 
@@ -1387,8 +1410,8 @@ textarea {
 .input-grande:focus,
 .input-tabela:focus {
     outline: none;
-    border-color: var(--verde-500);
-    box-shadow: 0 0 0 3px rgba(39, 160, 108, .15);
+    border-color: var(--azul-500);
+    box-shadow: 0 0 0 3px rgba(31, 132, 205, .15);
 }
 
 .input-grande:disabled,
@@ -1402,7 +1425,7 @@ textarea {
 }
 
 .sobra.positiva {
-    color: var(--laranja-600);
+    color: var(--laranja-700);
     font-weight: 700;
 }
 
@@ -1433,7 +1456,7 @@ textarea {
 }
 
 .aviso-info {
-    color: #1e4f9e;
+    color: var(--azul-700);
     background: var(--azul-100);
 }
 
@@ -1469,7 +1492,7 @@ textarea {
 
 .cartao:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(15, 40, 28, .08);
+    box-shadow: 0 10px 28px rgba(28, 45, 70, .08);
 }
 
 .cartao-topo {
@@ -1497,12 +1520,12 @@ textarea {
     border-radius: 11px;
     font-size: 13px;
     font-weight: 750;
-    color: var(--verde-700);
-    background: var(--verde-100);
+    color: var(--azul-700);
+    background: var(--azul-100);
 }
 
 .numero.laranja {
-    color: var(--laranja-600);
+    color: var(--laranja-700);
     background: var(--laranja-100);
 }
 
@@ -1589,9 +1612,9 @@ textarea {
     white-space: nowrap;
 }
 
-.ref-inteiro { color: var(--roxo-600); background: var(--roxo-100); }
-.ref-base { color: var(--azul-600); background: var(--azul-100); }
-.ref-subitens { color: var(--laranja-600); background: var(--laranja-100); }
+.ref-inteiro { color: var(--azul-700); background: var(--ardosia-100); }
+.ref-base { color: var(--azul-texto); background: var(--azul-100); }
+.ref-subitens { color: var(--laranja-700); background: var(--laranja-100); }
 
 .referencias {
     display: grid;
@@ -1629,8 +1652,8 @@ textarea {
     display: grid;
     place-items: center;
     border-radius: 12px;
-    color: var(--roxo-600);
-    background: var(--roxo-100);
+    color: var(--azul-700);
+    background: var(--ardosia-100);
 }
 
 .empenho-titulo strong {
@@ -1761,8 +1784,8 @@ textarea {
 .campo select:focus,
 .campo textarea:focus {
     outline: none;
-    border-color: var(--verde-500);
-    box-shadow: 0 0 0 3px rgba(39, 160, 108, .15);
+    border-color: var(--azul-500);
+    box-shadow: 0 0 0 3px rgba(31, 132, 205, .15);
 }
 
 .campo input:disabled,
@@ -1823,13 +1846,13 @@ textarea {
 }
 
 .segmentado input:checked + span {
-    color: var(--verde-700);
+    color: var(--azul-700);
     background: var(--superficie);
-    box-shadow: 0 1px 3px rgba(15, 40, 28, .12);
+    box-shadow: 0 1px 3px rgba(28, 45, 70, .12);
 }
 
 .segmentado input:focus-visible + span {
-    outline: 2px solid var(--verde-500);
+    outline: 2px solid var(--azul-500);
 }
 
 .dica {
@@ -1837,16 +1860,16 @@ textarea {
     align-items: flex-start;
     gap: 10px;
     padding: 12px 14px;
-    border: 1px solid var(--verde-100);
+    border: 1px solid var(--azul-100);
     border-radius: 10px;
-    background: var(--verde-50);
+    background: var(--azul-50);
     font-size: 12.5px;
-    color: var(--verde-800);
+    color: var(--azul-800);
 }
 
 .dica .icone {
     font-size: 19px;
-    color: var(--verde-600);
+    color: var(--azul-texto);
 }
 
 .btn-adicionar + .dica {
@@ -1915,7 +1938,7 @@ textarea {
 }
 
 .modal::backdrop {
-    background: rgba(6, 22, 15, .45);
+    background: rgba(15, 28, 46, .45);
     backdrop-filter: blur(3px);
 }
 
@@ -1976,7 +1999,7 @@ textarea {
     padding: 13px 18px 13px 14px;
     border-radius: 12px;
     color: #fff;
-    background: var(--verde-950);
+    background: var(--azul-950);
     box-shadow: var(--sombra-forte);
     font-weight: 500;
     opacity: 0;
