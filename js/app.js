@@ -31,13 +31,17 @@ const el = id => document.getElementById(id);
 const buscar = (lista, id) => lista.find(item => item.id === id);
 const num = valor => valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
 const arredondar = valor => Math.round(valor * 10) / 10;
+const arredondarCima = valor => Math.ceil(valor - 1e-9);
 const formatarData = iso => iso.split("-").reverse().join("/");
 const diaMes = iso => `${iso.slice(8)}/${iso.slice(5, 7)}`;
 const mesCurto = iso => new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
 const icone = nome => `<span class="icone">${nome}</span>`;
 const badge = (texto, cor) => `<span class="badge badge-${cor}">${texto}</span>`;
 const pendente = entrega => entrega.estado === "agendado" || entrega.estado === "entrega_parcial";
+const situacaoEmpenho = empenho => empenho.dataFinal < hoje ? "encerrado" : "vigente";
 const botoesLinha = modal => `<button class="btn-icone" data-modal="${modal}" title="Editar">${icone("edit")}</button><button class="btn-icone" title="Excluir">${icone("delete")}</button>`;
+const opcoes = (lista, vazio) => `<option value="">${vazio}</option>` + lista.map(([valor, texto]) => `<option value="${valor}">${texto}</option>`).join("");
+const sincronizar = area => area.querySelectorAll("select[onchange]").forEach(select => select.dispatchEvent(new Event("change")));
 
 let semanaAtual = segundaDaSemana(hoje);
 let agendadoSelecionado = null;
@@ -53,20 +57,47 @@ function segundaDaSemana(iso) {
     return somarDias(iso, -((data.getDay() + 6) % 7));
 }
 
+function siglaUnidade(id) {
+    const unidade = buscar(unidadesMedida, id);
+    const multiplo = buscar(multiplos, unidade.multiplo);
+    return `${multiplo ? multiplo.sigla : ""}${buscar(unidadesBasicas, unidade.basica).sigla}`;
+}
+
+function nomeUnidade(id) {
+    const unidade = buscar(unidadesMedida, id);
+    const multiplo = buscar(multiplos, unidade.multiplo);
+    const nome = `${multiplo ? multiplo.nome : ""}${buscar(unidadesBasicas, unidade.basica).nome}`;
+    return `${nome[0].toUpperCase()}${nome.slice(1)} (${siglaUnidade(id)})`;
+}
+
+function unidadeAlimento(alimentoId) {
+    return siglaUnidade(buscar(alimentos, alimentoId).unidade);
+}
+
 function nomeProduto(produto) {
     return `${buscar(alimentos, produto.alimento).nome} · ${produto.descricao}`;
 }
 
 function itensVigentes(produtoId) {
-    return empenhos.filter(e => e.situacao === "vigente").flatMap(e => e.itens).filter(i => i.produto === produtoId);
+    return empenhos.filter(e => situacaoEmpenho(e) === "vigente").flatMap(e => e.itens).filter(i => i.produto === produtoId);
 }
 
 function provisionado(produtoId) {
     return itensVigentes(produtoId).reduce((total, item) => total + item.empenhada, 0);
 }
 
+function aReceber(produtoId, empenhoId) {
+    return entregasEmpenho
+        .filter(e => pendente(e) && e.produto === produtoId && (!empenhoId || e.empenho === empenhoId))
+        .reduce((total, e) => total + e.quantSolicitada - e.quantEntregue, 0);
+}
+
 function saldoEmpenho(produtoId) {
-    return itensVigentes(produtoId).reduce((total, item) => total + item.empenhada - item.entregue, 0);
+    return itensVigentes(produtoId).reduce((total, item) => total + item.empenhada - item.entregue, 0) - aReceber(produtoId);
+}
+
+function saldoItemEmpenho(empenho, item) {
+    return item.empenhada - item.entregue - aReceber(item.produto, empenho.id);
 }
 
 function fornecedorDoEmpenho(empenhoId) {
@@ -75,9 +106,9 @@ function fornecedorDoEmpenho(empenhoId) {
 
 function consumo(item) {
     const produto = buscar(produtos, item.produto);
-    if (item.referencia === "inteiro") return `${num(item.quant)} ${produto.embalagem}`;
-    if (item.referencia === "unidade_base") return `${num(item.quant)} ${buscar(alimentos, produto.alimento).unidade}`;
-    return `${num(item.quant)} ${produto.nomeSubitem}`;
+    if (item.referencia === "inteiro") return `${num(item.quant)} un`;
+    if (item.referencia === "unidade_base") return `${num(item.quant)} ${unidadeAlimento(produto.alimento)}`;
+    return `${num(item.quant)} ${item.quant === 1 ? produto.nomeSubitem.replace(/s$/, "") : produto.nomeSubitem}`;
 }
 
 function porLanche(item) {
@@ -107,9 +138,31 @@ function barraPercentual(pct) {
     return `<div class="percentual"><div class="barra"><i class="ok" style="width:${pct}%"></i></div><span>${pct}%</span></div>`;
 }
 
-function situacaoNecessidade(produto, necessario) {
-    if (necessario <= produto.estoque) return ["Estoque suficiente", "verde", ""];
-    if (necessario <= produto.estoque + saldoEmpenho(produto.id)) return ["Solicitar entrega", "laranja", `<a class="btn-mini" href="#agenda-empenho">Solicitar entrega</a>`];
+function consumoProdutos(inicio, fim) {
+    const totais = new Map();
+    agendados.filter(a => a.situacao === "agendado" && a.data >= inicio && a.data <= fim).forEach(a => {
+        buscar(lanches, a.lanche).itens.forEach(item => totais.set(item.produto, (totais.get(item.produto) || 0) + porLanche(item) * a.quantidade));
+    });
+    return totais;
+}
+
+function previsao() {
+    const antes = consumoProdutos(hoje, somarDias(semanaPrevisao.inicio, -1));
+    return [...consumoProdutos(semanaPrevisao.inicio, semanaPrevisao.fim)]
+        .map(([produtoId, total]) => {
+            const produto = buscar(produtos, produtoId);
+            return {
+                produto,
+                necessario: arredondarCima(total),
+                previsto: produto.estoque + aReceber(produtoId) - arredondarCima(antes.get(produtoId) || 0)
+            };
+        })
+        .sort((a, b) => nomeProduto(a.produto).localeCompare(nomeProduto(b.produto)));
+}
+
+function situacaoNecessidade({ produto, necessario, previsto }) {
+    if (necessario <= previsto) return ["Estoque suficiente", "verde", ""];
+    if (necessario <= previsto + saldoEmpenho(produto.id)) return ["Solicitar entrega", "laranja", `<a class="btn-mini" href="#agenda-empenho">Solicitar entrega</a>`];
     return ["Sem empenho", "vermelho", `<a class="btn-mini" href="#empenhos">Cadastrar empenho</a>`];
 }
 
@@ -130,13 +183,13 @@ function alternarMenu() {
 function renderInicio() {
     const doDia = agendados.filter(a => a.data === hoje);
     const pendentes = entregasEmpenho.filter(pendente).sort((a, b) => a.dataPrevista.localeCompare(b.dataPrevista));
-    const vigentes = empenhos.filter(e => e.situacao === "vigente");
+    const vigentes = empenhos.filter(e => situacaoEmpenho(e) === "vigente");
 
     el("inicio-data").textContent = new Date(`${hoje}T12:00:00`).toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
     el("stat-lanches").textContent = doDia.reduce((total, a) => total + a.quantidade, 0);
     el("stat-lanches-info").textContent = `${doDia.length} opções em ${new Set(doDia.map(a => a.turno)).size} turnos`;
     el("stat-entregas").textContent = pendentes.length;
-    el("stat-abaixo").textContent = necessidade.filter(n => n.necessario > buscar(produtos, n.produto).estoque).length;
+    el("stat-abaixo").textContent = previsao().filter(n => n.necessario > n.previsto).length;
     el("stat-empenhos").textContent = vigentes.length;
     el("stat-empenhos-info").textContent = `${new Set(vigentes.map(e => e.fornecedor)).size} fornecedores`;
 
@@ -198,14 +251,14 @@ function renderSemana() {
 
 function renderNecessidade() {
     el("previsao-periodo").textContent = `${formatarData(semanaPrevisao.inicio)} a ${formatarData(semanaPrevisao.fim)}`;
-    el("tabela-necessidade").innerHTML = necessidade.map(n => {
-        const produto = buscar(produtos, n.produto);
-        const [texto, cor, acao] = situacaoNecessidade(produto, n.necessario);
+    el("tabela-necessidade").innerHTML = previsao().map(n => {
+        const { produto } = n;
+        const [texto, cor, acao] = situacaoNecessidade(n);
         return `
             <tr>
                 <td><strong>${nomeProduto(produto)}</strong></td>
                 <td class="num">${num(n.necessario)} ${produto.embalagem}</td>
-                <td class="num">${num(produto.estoque)} ${produto.embalagem}</td>
+                <td class="num">${num(n.previsto)} ${produto.embalagem}<small>atual ${num(produto.estoque)} · a receber ${num(aReceber(produto.id))}</small></td>
                 <td class="num">${num(saldoEmpenho(produto.id))} ${produto.embalagem}</td>
                 <td>${badge(texto, cor)}</td>
                 <td class="acoes">${acao}</td>
@@ -244,7 +297,6 @@ function renderEntregaDetalhe() {
     const cardapio = buscar(cardapios, lanche.cardapio);
     const entregue = agendado.situacao === "entregue";
     const bloqueio = entregue ? " disabled" : "";
-    const proporcao = entregue ? agendado.entregues / agendado.quantidade : 1;
     const entregues = entregue ? agendado.entregues : agendado.quantidade;
 
     el("entrega-detalhe").innerHTML = `
@@ -264,18 +316,20 @@ function renderEntregaDetalhe() {
         </div>
         <div class="tabela-wrap tabela-borda">
             <table class="tabela">
-                <thead><tr><th>Item do lanche</th><th>Referência</th><th class="num">Planejado</th><th class="num">Entregue</th><th class="num">Sobra</th></tr></thead>
+                <thead><tr><th>Item do lanche</th><th>Referência</th><th class="num">Planejado</th><th class="num">Entregue</th><th class="num">Sobra</th><th>Observação</th></tr></thead>
                 <tbody>${lanche.itens.map(item => {
                     const produto = buscar(produtos, item.produto);
                     const planejado = arredondar(porLanche(item) * agendado.quantidade);
+                    const registro = agendado.itens.find(i => i.itemLanche === item.id) || { quantEntregue: planejado, observacoes: "" };
                     const ref = referencias[item.referencia];
                     return `
                         <tr data-linha>
                             <td><strong>${nomeProduto(produto)}</strong><small>${consumo(item)} por lanche</small></td>
                             <td><span class="ref ${ref.classe}">${ref.nome}</span></td>
                             <td class="num">${num(planejado)} ${produto.embalagem}</td>
-                            <td class="num"><input class="input-tabela" type="number" min="0" step="0.1" value="${arredondar(planejado * proporcao)}" data-planejado="${planejado}" data-unidade="${produto.embalagem}" oninput="atualizarSobra(this)"${bloqueio}></td>
+                            <td class="num"><input class="input-tabela" type="number" min="0" step="0.1" value="${registro.quantEntregue}" data-planejado="${planejado}" data-unidade="${produto.embalagem}" oninput="atualizarSobra(this)"${bloqueio}></td>
                             <td class="num sobra"></td>
+                            <td><input class="input-tabela input-texto" type="text" placeholder="Opcional" value="${registro.observacoes}"${bloqueio}></td>
                         </tr>`;
                 }).join("")}</tbody>
             </table>
@@ -330,7 +384,7 @@ function renderCardapios() {
                 </div>
                 <ul class="itens">${c.itens.map(item => {
                     const alimento = buscar(alimentos, item.alimento);
-                    return `<li><i class="natureza-ponto ${alimento.natureza.toLowerCase()}"></i>${alimento.nome}<strong>${num(item.quant)} ${alimento.unidade}</strong></li>`;
+                    return `<li><i class="natureza-ponto ${alimento.natureza.toLowerCase()}"></i><span class="item-produto">${alimento.nome}${item.descricao ? `<small>${item.descricao}</small>` : ""}</span><strong>${num(item.quant)} ${siglaUnidade(alimento.unidade)}</strong></li>`;
                 }).join("")}</ul>
                 <div class="cartao-rodape">
                     <span>${vinculados} ${vinculados === 1 ? "lanche vinculado" : "lanches vinculados"}</span>
@@ -370,7 +424,7 @@ function renderAlimentos() {
                 <td><div class="celula-nome"><span class="avatar-item ${bebida ? "bebida" : "comida"}">${icone(bebida ? "local_drink" : "restaurant")}</span><div><strong>${a.nome}</strong><small>${a.descricao}</small></div></div></td>
                 <td>${badge(a.natureza, bebida ? "azul" : "laranja")}</td>
                 <td>${a.grupo}</td>
-                <td><span class="unidade">${a.unidade}</span></td>
+                <td><span class="unidade">${siglaUnidade(a.unidade)}</span></td>
                 <td class="num">${produtos.filter(p => p.alimento === a.id).length}</td>
                 <td class="acoes">${botoesLinha("modal-alimento")}</td>
             </tr>`;
@@ -384,7 +438,7 @@ function renderProdutos() {
         return `
             <tr data-filtro="${alimento.natureza}">
                 <td><div class="celula-nome"><span class="avatar-item ${bebida ? "bebida" : "comida"}">${icone(bebida ? "local_drink" : "inventory_2")}</span><div><strong>${alimento.nome}</strong><small>${p.descricao} · cód. ${p.id}</small></div></div></td>
-                <td>${num(p.quantUnitBase)} ${alimento.unidade}<small>por ${p.embalagem}</small></td>
+                <td>${num(p.quantUnitBase)} ${siglaUnidade(alimento.unidade)}<small>por ${p.embalagem}</small></td>
                 <td>${p.subitens ? `${p.subitens} ${p.nomeSubitem}` : "—"}</td>
                 <td class="col-estoque">${barraEstoque(p)}<small>${num(p.estoque)} de ${num(provisionado(p.id))} ${p.embalagem}</small></td>
                 <td class="num">${num(provisionado(p.id))} ${p.embalagem}</td>
@@ -395,7 +449,7 @@ function renderProdutos() {
 
 function renderFornecedores() {
     el("tabela-fornecedores").innerHTML = fornecedores.map(f => {
-        const vigentes = empenhos.filter(e => e.fornecedor === f.id && e.situacao === "vigente").length;
+        const vigentes = empenhos.filter(e => e.fornecedor === f.id && situacaoEmpenho(e) === "vigente").length;
         const iniciais = f.nome.split(" ").filter(parte => parte.length > 2).slice(0, 2).map(parte => parte[0]).join("");
         return `
             <tr>
@@ -410,7 +464,7 @@ function renderFornecedores() {
 
 function renderEmpenhos() {
     el("lista-empenhos").innerHTML = empenhos.map(e => `
-        <article class="card empenho" data-filtro="${e.situacao}">
+        <article class="card empenho" data-filtro="${situacaoEmpenho(e)}">
             <div class="empenho-topo">
                 <div class="empenho-icone">${icone("receipt_long")}</div>
                 <div class="empenho-titulo"><strong>${e.sigla}</strong><span>${buscar(fornecedores, e.fornecedor).nome}</span></div>
@@ -418,7 +472,7 @@ function renderEmpenhos() {
                     <span>${icone("date_range")}${formatarData(e.dataInicial)} a ${formatarData(e.dataFinal)}</span>
                     <span>${icone("inventory_2")}${e.itens.length} ${e.itens.length === 1 ? "item" : "itens"}</span>
                 </div>
-                ${e.situacao === "vigente" ? badge("Vigente", "verde") : badge("Encerrado", "cinza")}
+                ${situacaoEmpenho(e) === "vigente" ? badge("Vigente", "verde") : badge("Encerrado", "cinza")}
                 <button class="btn-icone" data-modal="modal-empenho" title="Editar">${icone("edit")}</button>
             </div>
             <div class="tabela-wrap tabela-embutida">
@@ -487,7 +541,10 @@ function renderRecebimento() {
                         <label class="campo"><span>Quantidade recebida</span><input type="number" min="0" value="${saldo}"></label>
                         <label class="campo campo-largo"><span>Observação</span><input type="text" placeholder="Opcional" value="${e.observacao}"></label>
                     </div>
-                    <div class="recebimento-acoes"><button class="btn btn-primario" data-toast="Recebimento registrado">${icone("inventory")}Registrar recebimento</button></div>
+                    <div class="recebimento-acoes">
+                        ${e.estado === "entrega_parcial" ? `<button class="btn btn-fantasma" data-toast="Solicitação finalizada, o restante volta ao saldo do empenho">${icone("block")}Finalizar sem completar</button>` : ""}
+                        <button class="btn btn-primario" data-toast="Recebimento registrado">${icone("inventory")}Registrar recebimento</button>
+                    </div>
                 </article>`;
         }).join("");
 
@@ -511,18 +568,66 @@ function renderRecebimento() {
 }
 
 const opcoesSelect = {
-    alimentos: () => alimentos.map(a => [a.id, `${a.nome} (${a.unidade})`]),
+    unidades: () => unidadesMedida.map(u => [u.id, nomeUnidade(u.id)]),
+    alimentos: () => alimentos.map(a => [a.id, `${a.nome} (${siglaUnidade(a.unidade)})`]),
     produtos: () => produtos.map(p => [p.id, nomeProduto(p)]),
     fornecedores: () => fornecedores.map(f => [f.id, f.nome]),
-    empenhos: () => empenhos.filter(e => e.situacao === "vigente").map(e => [e.id, `${e.sigla} · ${buscar(fornecedores, e.fornecedor).nome}`]),
+    empenhos: () => empenhos.filter(e => situacaoEmpenho(e) === "vigente").map(e => [e.id, `${e.sigla} · ${buscar(fornecedores, e.fornecedor).nome}`]),
     cardapios: () => cardapios.map(c => [c.id, `Cardápio ${c.id} · ${c.nome}`]),
     lanches: () => lanches.map(l => [l.id, `Lanche ${l.id} · ${l.descricao}`])
 };
 
 function preencherSelects() {
     document.querySelectorAll("select[data-opcoes]").forEach(select => {
-        select.innerHTML = `<option value="">Selecione</option>` + opcoesSelect[select.dataset.opcoes]().map(([valor, texto]) => `<option value="${valor}">${texto}</option>`).join("");
+        select.innerHTML = opcoes(opcoesSelect[select.dataset.opcoes](), "Selecione");
     });
+}
+
+function mostrarUnidade(select) {
+    el("produto-unidade").textContent = select.value ? unidadeAlimento(Number(select.value)) : "—";
+}
+
+function preencherItensEmpenho(form) {
+    const empenho = buscar(empenhos, Number(form.elements.empenho.value));
+    const select = form.elements.itemEmpenho;
+    select.innerHTML = empenho
+        ? opcoes(empenho.itens.map(item => {
+            const produto = buscar(produtos, item.produto);
+            return [item.produto, `${nomeProduto(produto)} · saldo ${num(saldoItemEmpenho(empenho, item))} ${produto.embalagem}`];
+        }), "Selecione")
+        : opcoes([], "Selecione o empenho");
+    select.disabled = !empenho;
+    limitarQuantidade(form);
+}
+
+function limitarQuantidade(form) {
+    const empenho = buscar(empenhos, Number(form.elements.empenho.value));
+    const item = empenho && empenho.itens.find(i => i.produto === Number(form.elements.itemEmpenho.value));
+    const quantidade = form.elements.quantidade;
+    if (item) quantidade.max = saldoItemEmpenho(empenho, item);
+    else quantidade.removeAttribute("max");
+}
+
+function filtrarProdutosLanche(form) {
+    const cardapio = buscar(cardapios, Number(form.elements.cardapio.value));
+    const permitidos = cardapio ? produtos.filter(p => cardapio.itens.some(i => i.alimento === p.alimento)) : [];
+    form.querySelectorAll("[name=produto]").forEach(select => {
+        select.innerHTML = opcoes(permitidos.map(p => [p.id, nomeProduto(p)]), cardapio ? "Selecione" : "Selecione o cardápio");
+        select.disabled = !cardapio;
+        ajustarReferencia(select.closest(".linha-item"));
+    });
+}
+
+function ajustarReferencia(linha) {
+    const produto = buscar(produtos, Number(linha.querySelector("[name=produto]").value));
+    const referencia = linha.querySelector("[name=referencia]");
+    const conversao = linha.querySelector("[name=conversao]");
+    referencia.querySelector("[value=unidade_base]").disabled = Boolean(produto) && unidadeAlimento(produto.alimento) === "un";
+    referencia.querySelector("[value=subitens]").disabled = Boolean(produto) && !produto.subitens;
+    if (referencia.selectedOptions[0].disabled) referencia.value = "inteiro";
+    conversao.disabled = referencia.value !== "subitens";
+    conversao.placeholder = produto && produto.subitens ? `Auto (${produto.subitens})` : "Auto";
+    if (conversao.disabled) conversao.value = "";
 }
 
 function adicionarLinha(botao) {
@@ -531,6 +636,7 @@ function adicionarLinha(botao) {
     nova.querySelectorAll("input").forEach(campo => campo.value = "");
     nova.querySelectorAll("select").forEach(campo => campo.selectedIndex = 0);
     lista.append(nova);
+    sincronizar(nova);
 }
 
 function filtrar(area) {
@@ -557,6 +663,7 @@ document.addEventListener("click", evento => {
     if (abrir) {
         const modal = el(abrir.dataset.modal);
         modal.querySelector("form").reset();
+        sincronizar(modal);
         modal.showModal();
     }
 
@@ -564,7 +671,7 @@ document.addEventListener("click", evento => {
     if (alvo.matches("dialog")) alvo.close();
 
     const aviso = alvo.closest("[data-toast]");
-    if (aviso) mostrarToast(aviso.dataset.toast);
+    if (aviso && (!aviso.form || aviso.form.checkValidity())) mostrarToast(aviso.dataset.toast);
 
     const chip = alvo.closest(".chips button");
     if (chip) {

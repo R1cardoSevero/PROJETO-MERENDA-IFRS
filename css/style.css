@@ -1254,7 +1254,7 @@ textarea {
 
 .entrega-layout {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 300px minmax(0, 1fr);
     gap: 20px;
     align-items: start;
 }
@@ -1405,6 +1405,11 @@ textarea {
     border-radius: 8px;
     text-align: right;
     font-variant-numeric: tabular-nums;
+}
+
+.input-tabela.input-texto {
+    width: 140px;
+    text-align: left;
 }
 
 .input-grande:focus,
@@ -1729,6 +1734,7 @@ textarea {
 .recebimento-acoes {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
     margin-top: 16px;
 }
 
@@ -1792,6 +1798,11 @@ textarea {
 .campo textarea:disabled {
     color: var(--texto-2);
     background: var(--superficie-2);
+}
+
+.campo select:disabled {
+    color: var(--texto-2);
+    background-color: var(--superficie-2);
 }
 
 .input-sufixo {
@@ -1907,6 +1918,10 @@ textarea {
 
 .linha-item.lanche {
     grid-template-columns: 2fr 1.2fr .8fr .8fr auto;
+}
+
+.linha-item.cardapio {
+    grid-template-columns: 1.6fr .8fr 1.6fr auto;
 }
 
 .linha-item .btn-icone {
@@ -2130,7 +2145,8 @@ textarea {
 
     .campos,
     .linha-item,
-    .linha-item.lanche {
+    .linha-item.lanche,
+    .linha-item.cardapio {
         grid-template-columns: 1fr;
     }
 

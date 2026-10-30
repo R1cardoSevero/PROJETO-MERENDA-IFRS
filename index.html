@@ -155,13 +155,13 @@
                     <div class="card-topo">
                         <div>
                             <h3>Previsão de produtos</h3>
-                            <p>Quantidade necessária para a semana de <span id="previsao-periodo"></span>, comparada ao estoque e ao saldo dos empenhos</p>
+                            <p>Quantidade calculada a partir dos lanches agendados para a semana de <span id="previsao-periodo"></span>. O estoque previsto soma as entregas a receber e desconta os lanches agendados até lá.</p>
                         </div>
                     </div>
                     <div class="tabela-wrap tabela-embutida">
                         <table class="tabela">
                             <thead>
-                                <tr><th>Produto</th><th class="num">Necessário</th><th class="num">Em estoque</th><th class="num">Saldo em empenho</th><th>Situação</th><th></th></tr>
+                                <tr><th>Produto</th><th class="num">Necessário</th><th class="num">Estoque previsto</th><th class="num">Saldo a solicitar</th><th>Situação</th><th></th></tr>
                             </thead>
                             <tbody id="tabela-necessidade"></tbody>
                         </table>
@@ -368,7 +368,7 @@
                 <div class="pagina-topo">
                     <div>
                         <h1>Recebimento de produtos</h1>
-                        <p>Confirme as entregas feitas pelos fornecedores. O estoque disponível é atualizado com a quantidade recebida.</p>
+                        <p>Confirme as entregas feitas pelos fornecedores. O estoque disponível é atualizado com a quantidade recebida. Se uma entrega parcial não for completada, finalize a solicitação para devolver o restante ao saldo do empenho.</p>
                     </div>
                 </div>
 
@@ -435,14 +435,16 @@
                 </div>
                 <div class="itens-titulo"><h4>Itens de alimento</h4><span>Quantidade na unidade base do alimento</span></div>
                 <div class="itens-form">
-                    <div class="linha-item">
+                    <div class="linha-item cardapio">
                         <label class="campo"><span>Alimento</span><select data-opcoes="alimentos"></select></label>
                         <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 0,25"></label>
+                        <label class="campo"><span>Descrição</span><input type="text" placeholder="Opcional"></label>
                         <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
                     </div>
-                    <div class="linha-item">
+                    <div class="linha-item cardapio">
                         <label class="campo"><span>Alimento</span><select data-opcoes="alimentos"></select></label>
                         <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 0,25"></label>
+                        <label class="campo"><span>Descrição</span><input type="text" placeholder="Opcional"></label>
                         <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
                     </div>
                 </div>
@@ -463,28 +465,28 @@
             </header>
             <div class="modal-corpo">
                 <div class="campos">
-                    <label class="campo"><span>Cardápio</span><select data-opcoes="cardapios"></select></label>
+                    <label class="campo"><span>Cardápio</span><select name="cardapio" data-opcoes="cardapios" required onchange="filtrarProdutosLanche(this.form)"></select></label>
                     <label class="campo"><span>Descrição</span><input type="text" placeholder="Ex.: Pastel + suco em caixinha"></label>
                 </div>
                 <div class="itens-titulo"><h4>Itens do lanche</h4><span>Produto e forma de consumo</span></div>
                 <div class="itens-form">
                     <div class="linha-item lanche">
-                        <label class="campo"><span>Produto</span><select data-opcoes="produtos"></select></label>
-                        <label class="campo"><span>Referência</span><select><option>Inteiro</option><option>Unidade base</option><option>Subitens</option></select></label>
-                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 1"></label>
-                        <label class="campo"><span>Conversão</span><input type="number" min="1" placeholder="Auto"></label>
+                        <label class="campo"><span>Produto</span><select name="produto" required disabled onchange="ajustarReferencia(this.closest('.linha-item'))"></select></label>
+                        <label class="campo"><span>Referência</span><select name="referencia" onchange="ajustarReferencia(this.closest('.linha-item'))"><option value="inteiro">Inteiro</option><option value="unidade_base">Unidade base</option><option value="subitens">Subitens</option></select></label>
+                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 1" required></label>
+                        <label class="campo"><span>Conversão</span><input name="conversao" type="number" min="1" placeholder="Auto" disabled></label>
                         <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
                     </div>
                     <div class="linha-item lanche">
-                        <label class="campo"><span>Produto</span><select data-opcoes="produtos"></select></label>
-                        <label class="campo"><span>Referência</span><select><option>Inteiro</option><option>Unidade base</option><option>Subitens</option></select></label>
-                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 1"></label>
-                        <label class="campo"><span>Conversão</span><input type="number" min="1" placeholder="Auto"></label>
+                        <label class="campo"><span>Produto</span><select name="produto" required disabled onchange="ajustarReferencia(this.closest('.linha-item'))"></select></label>
+                        <label class="campo"><span>Referência</span><select name="referencia" onchange="ajustarReferencia(this.closest('.linha-item'))"><option value="inteiro">Inteiro</option><option value="unidade_base">Unidade base</option><option value="subitens">Subitens</option></select></label>
+                        <label class="campo"><span>Quantidade</span><input type="number" step="0.01" min="0" placeholder="Ex.: 1" required></label>
+                        <label class="campo"><span>Conversão</span><input name="conversao" type="number" min="1" placeholder="Auto" disabled></label>
                         <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
                     </div>
                 </div>
                 <button type="button" class="btn-adicionar" data-adicionar><span class="icone">add</span>Adicionar item</button>
-                <div class="dica"><span class="icone">info</span><p>A conversão só é usada em subitens. Deixe em branco para usar a quantidade de subitens cadastrada no produto.</p></div>
+                <div class="dica"><span class="icone">info</span><p>Só aparecem produtos dos alimentos do cardápio escolhido. A conversão só é usada em subitens: deixe em branco para usar a quantidade de subitens cadastrada no produto.</p></div>
             </div>
             <footer class="modal-rodape">
                 <button type="button" class="btn btn-fantasma" data-fechar>Cancelar</button>
@@ -516,7 +518,7 @@
                     </label>
                     <label class="campo">
                         <span>Unidade de medida base</span>
-                        <select><option>Quilograma (Kg)</option><option>Grama (g)</option><option>Litro (L)</option><option>Mililitro (mL)</option><option>Unidade (un)</option><option>Dúzia (dz)</option></select>
+                        <select data-opcoes="unidades" required></select>
                     </label>
                 </div>
             </div>
@@ -535,13 +537,13 @@
             </header>
             <div class="modal-corpo">
                 <div class="campos">
-                    <label class="campo"><span>Alimento</span><select data-opcoes="alimentos"></select></label>
+                    <label class="campo"><span>Alimento</span><select data-opcoes="alimentos" required onchange="mostrarUnidade(this)"></select></label>
                     <label class="campo">
                         <span>Embalagem</span>
                         <select><option>Unidade (un)</option><option>Pacote (pct)</option><option>Caixa (cx)</option><option>Garrafa (gf)</option><option>Saco (sc)</option><option>Quilo (kg)</option></select>
                     </label>
                     <label class="campo campo-largo"><span>Descrição</span><input type="text" placeholder="Ex.: Pacote 400g"></label>
-                    <label class="campo"><span>Quantidade unitária base</span><span class="input-sufixo"><input type="number" step="0.01" min="0" placeholder="0,4"><em>Kg</em></span></label>
+                    <label class="campo"><span>Quantidade unitária base</span><span class="input-sufixo"><input type="number" step="0.01" min="0" placeholder="0,4" required><em id="produto-unidade">—</em></span></label>
                     <label class="campo"><span>Estoque atual</span><input type="number" min="0" placeholder="0"></label>
                     <label class="campo"><span>Quantidade de subitens</span><input type="number" min="0" placeholder="Ex.: 40"></label>
                     <label class="campo"><span>Nome do subitem</span><input type="text" placeholder="Ex.: biscoitos"></label>
@@ -614,12 +616,12 @@
             </header>
             <div class="modal-corpo">
                 <div class="campos">
-                    <label class="campo campo-largo"><span>Empenho</span><select data-opcoes="empenhos"></select></label>
-                    <label class="campo campo-largo"><span>Produto</span><select data-opcoes="produtos"></select></label>
-                    <label class="campo"><span>Quantidade solicitada</span><input type="number" min="1" placeholder="Ex.: 300"></label>
-                    <label class="campo"><span>Data prevista de entrega</span><input type="date"></label>
+                    <label class="campo campo-largo"><span>Empenho</span><select name="empenho" data-opcoes="empenhos" required onchange="preencherItensEmpenho(this.form)"></select></label>
+                    <label class="campo campo-largo"><span>Item do empenho</span><select name="itemEmpenho" required disabled onchange="limitarQuantidade(this.form)"></select></label>
+                    <label class="campo"><span>Quantidade solicitada</span><input name="quantidade" type="number" min="1" placeholder="Ex.: 300" required></label>
+                    <label class="campo"><span>Data prevista de entrega</span><input type="date" required></label>
                     <label class="campo campo-largo"><span>Observação</span><textarea rows="2" placeholder="Opcional"></textarea></label>
-                    <div class="dica campo-largo"><span class="icone">info</span><p>A data da solicitação é registrada automaticamente e o estado inicial é “Agendado”.</p></div>
+                    <div class="dica campo-largo"><span class="icone">info</span><p>A quantidade não pode passar do saldo do item que ainda não foi solicitado. A data da solicitação é registrada automaticamente e o estado inicial é “Agendado”.</p></div>
                 </div>
             </div>
             <footer class="modal-rodape">
