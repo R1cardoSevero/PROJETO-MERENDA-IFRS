@@ -2033,6 +2033,63 @@ textarea {
     transform: none;
 }
 
+/* Estados vazios, exclusão e erros (dados vindos do banco) */
+.cartoes > .vazio,
+.recebimentos > .vazio,
+.estoque-grade > .vazio {
+    grid-column: 1 / -1;
+}
+
+.tabela tbody tr.linha-vazia:hover {
+    background: none;
+}
+
+button.lanche-chip {
+    width: 100%;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+
+button.lanche-chip:hover {
+    border-top-color: var(--borda-forte);
+    border-right-color: var(--borda-forte);
+    border-bottom-color: var(--borda-forte);
+    background: var(--superficie-2);
+}
+
+.modal-rodape {
+    flex-wrap: wrap;
+}
+
+.btn-perigo {
+    margin-right: auto;
+    color: var(--vermelho-600);
+    background: var(--superficie);
+    border-color: var(--borda);
+}
+
+.btn-perigo:hover {
+    background: var(--vermelho-100);
+    border-color: var(--vermelho-100);
+}
+
+.aviso-erro {
+    margin-top: 16px;
+    color: var(--vermelho-600);
+    background: var(--vermelho-100);
+}
+
+.toast {
+    max-width: min(480px, calc(100vw - 48px));
+}
+
+.toast.erro .icone {
+    color: #ff9d9d;
+}
+
 @media (max-width: 1200px) {
     .stats {
         grid-template-columns: repeat(2, 1fr);
