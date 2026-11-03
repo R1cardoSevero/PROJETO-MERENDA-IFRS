@@ -55,7 +55,6 @@
             </div>
             <div class="topo-acoes">
                 <div class="data-hoje"><span class="icone">today</span><span id="data-hoje"></span></div>
-                <button class="btn-icone notificacao"><span class="icone">notifications</span><i></i></button>
                 <div class="usuario">
                     <div class="avatar">AD</div>
                     <div class="usuario-info">
@@ -439,8 +438,8 @@
                 <div class="itens-titulo"><h4>Itens de alimento</h4><span>Quantidade na unidade base do alimento</span></div>
                 <div class="itens-form">
                     <div class="linha-item cardapio">
-                        <label class="campo"><span>Alimento</span><select data-campo="fk_alimento" data-opcoes="alimentos" required></select></label>
-                        <label class="campo"><span>Quantidade</span><input type="number" data-campo="quant" step="any" min="0.001" placeholder="Ex.: 0,25" required></label>
+                        <label class="campo"><span>Alimento</span><select data-campo="fk_alimento" data-opcoes="alimentos" required onchange="mostrarUnidadeLinha(this)"></select></label>
+                        <label class="campo"><span>Quantidade <i class="unidade-campo" data-unidade></i></span><input type="number" data-campo="quant" step="any" min="0.001" placeholder="Ex.: 0,25" required></label>
                         <label class="campo"><span>Descrição</span><input type="text" data-campo="descricao" placeholder="Opcional"></label>
                         <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
                     </div>
@@ -472,7 +471,7 @@
                     <div class="linha-item lanche">
                         <label class="campo"><span>Produto</span><select data-campo="fk_produto" required disabled onchange="ajustarReferencia(this.closest('.linha-item'))"></select></label>
                         <label class="campo"><span>Referência</span><select data-campo="referencia_consumo" onchange="ajustarReferencia(this.closest('.linha-item'))"><option value="inteiro">Inteiro</option><option value="unidade_base">Unidade base</option><option value="subitens">Subitens</option></select></label>
-                        <label class="campo"><span>Quantidade</span><input type="number" data-campo="quant_consumida" step="any" min="0.001" placeholder="Ex.: 1" required></label>
+                        <label class="campo"><span>Quantidade <i class="unidade-campo" data-unidade></i></span><input type="number" data-campo="quant_consumida" step="any" min="0.001" placeholder="Ex.: 1" required></label>
                         <label class="campo"><span>Conversão</span><input type="number" data-campo="conversao_subitens" step="any" min="1" placeholder="Auto" disabled></label>
                         <button type="button" class="btn-icone" data-remover title="Remover"><span class="icone">delete</span></button>
                     </div>
@@ -562,9 +561,9 @@
             <div class="modal-corpo">
                 <div class="campos">
                     <label class="campo campo-largo"><span>Razão social</span><input type="text" name="nome" placeholder="Ex.: Padaria Pão do Campo Ltda" required></label>
-                    <label class="campo"><span>CNPJ</span><input type="text" name="cnpj" placeholder="00.000.000/0000-00" required></label>
-                    <label class="campo"><span>Telefone</span><input type="tel" name="telefone" placeholder="(51) 0000-0000"></label>
-                    <label class="campo campo-largo"><span>E-mail</span><input type="email" name="email" placeholder="contato@empresa.com.br"></label>
+                    <label class="campo"><span>CNPJ</span><input type="text" name="cnpj" placeholder="00.000.000/0000-00" maxlength="18" pattern="[0-9A-Za-z]{2}\.[0-9A-Za-z]{3}\.[0-9A-Za-z]{3}/[0-9A-Za-z]{4}-[0-9]{2}" title="CNPJ com 14 caracteres, como 00.000.000/0000-00" data-mascara="cnpj" autocomplete="off" required></label>
+                    <label class="campo"><span>Telefone</span><input type="tel" name="telefone" placeholder="(51) 0000-0000" maxlength="15" pattern="\([1-9][0-9]\) [0-9]{4,5}-[0-9]{4}" title="Telefone com DDD, como (51) 3333-4444" data-mascara="telefone" inputmode="tel"></label>
+                    <label class="campo campo-largo"><span>E-mail</span><input type="email" name="email" placeholder="contato@empresa.com.br" maxlength="120" pattern="[^@\s]+@[^@\s]+\.[^@\s]{2,}" title="E-mail como nome@empresa.com.br"></label>
                 </div>
             </div>
             <footer class="modal-rodape">
@@ -585,7 +584,7 @@
                 <div class="campos">
                     <label class="campo"><span>Número do empenho</span><input type="text" name="sigla" placeholder="Ex.: 2026NE000106" required></label>
                     <label class="campo"><span>Fornecedor</span><select name="fk_fornecedor" data-opcoes="fornecedores" required></select></label>
-                    <label class="campo"><span>Data inicial</span><input type="date" name="data_inicial" required></label>
+                    <label class="campo"><span>Data inicial</span><input type="date" name="data_inicial" required oninput="this.form.elements.data_final.min = this.value"></label>
                     <label class="campo"><span>Data final</span><input type="date" name="data_final" required></label>
                 </div>
                 <div class="itens-titulo"><h4>Itens empenhados</h4><span>Esses itens entram no estoque provisionado</span></div>

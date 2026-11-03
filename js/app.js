@@ -120,22 +120,23 @@ const saldoItemEmpenho = item => precisao(item.quant_empenhada - item.quant_entr
 const saldoEmpenho = produtoId => precisao(itensVigentes(produtoId).reduce((total, item) => total + saldoItemEmpenho(item), 0));
 const lancheBloqueado = lancheId => dados.lanche_agendado.some(a => a.fk_lanche === lancheId && a.situacao === "entregue");
 
-// Forma de consumo do item do lanche, com a unidade de consumo da especificação.
+// Forma de consumo do item do lanche, com a unidade de consumo da especificação ("1 un", "0,2 L", "4 biscoitos").
 function consumo(item) {
     const produto = buscar(dados.produto, item.fk_produto);
-    if (item.referencia_consumo === "inteiro") return `${num(item.quant_consumida)} un`;
-    if (item.referencia_consumo === "unidade_base") return `${num(item.quant_consumida)} ${unidadeAlimento(produto.fk_alimento)}`;
-    const plural = produto.nome_subitem || "subitens";
-    const singular = produto.nome_subitem ? plural.replace(/s$/, "") : "subitem";
-    return `${num(item.quant_consumida)} ${item.quant_consumida === 1 ? singular : plural}`;
+    let unidade = unidadeConsumo(item.referencia_consumo, produto);
+    if (item.referencia_consumo === "subitens" && item.quant_consumida === 1) unidade = produto.nome_subitem ? unidade.replace(/s$/, "") : "subitem";
+    return `${num(item.quant_consumida)} ${unidade}`;
 }
 
 // Quantas unidades do produto (embalagens) cada lanche consome.
-function porLanche(item) {
-    const produto = buscar(dados.produto, item.fk_produto);
-    if (item.referencia_consumo === "inteiro") return item.quant_consumida;
-    if (item.referencia_consumo === "unidade_base") return item.quant_consumida / produto.quant_unit_base;
-    return item.quant_consumida / (item.conversao_subitens || produto.quant_subitens);
+const porLanche = item => banco.consumoPorLanche(item, buscar(dados.produto, item.fk_produto));
+
+// Unidade em que a quantidade do item do lanche é informada (unidade de consumo da especificação).
+function unidadeConsumo(referencia, produto) {
+    if (!produto) return "";
+    if (referencia === "inteiro") return "un";
+    if (referencia === "unidade_base") return unidadeAlimento(produto.fk_alimento);
+    return produto.nome_subitem || "subitens";
 }
 
 function turnoTag(turno) {
@@ -357,7 +358,7 @@ function renderEntregaDetalhe() {
             </div>
             <div class="resumo-entrega" data-linha>
                 <div class="resumo-box"><span>Lanches previstos</span><strong>${agendado.quant_prevista}</strong></div>
-                <label class="resumo-box"><span>Lanches entregues</span><input class="input-grande" type="number" name="quant_entregue" min="0" step="1" required value="${entregue ? agendado.quant_entregue : agendado.quant_prevista}" data-planejado="${agendado.quant_prevista}" data-unidade="" oninput="atualizarSobra(this)"${bloqueio}></label>
+                <label class="resumo-box"><span>Lanches entregues</span><input class="input-grande" type="number" name="quant_entregue" min="0" max="${agendado.quant_prevista}" step="1" required value="${entregue ? agendado.quant_entregue : agendado.quant_prevista}" data-planejado="${agendado.quant_prevista}" data-unidade="" oninput="atualizarSobra(this)"${bloqueio}></label>
                 <div class="resumo-box"><span>Sobra</span><strong class="sobra"></strong></div>
             </div>
             <div class="tabela-wrap tabela-borda">
@@ -373,7 +374,7 @@ function renderEntregaDetalhe() {
                                 <td><strong>${esc(nomeProduto(produto))}</strong><small>${esc(consumo(item))} por lanche</small></td>
                                 <td><span class="ref ${ref.classe}">${ref.nome}</span></td>
                                 <td class="num">${num(planejado)} ${esc(embalagem(produto))}</td>
-                                <td class="num"><input class="input-tabela" type="number" data-campo="quant_entregue" min="0" step="any" required value="${registro.quant_entregue}" data-planejado="${planejado}" data-unidade="${esc(embalagem(produto))}" oninput="atualizarSobra(this)"${bloqueio}></td>
+                                <td class="num"><input class="input-tabela" type="number" data-campo="quant_entregue" min="0" max="${planejado}" step="any" required value="${registro.quant_entregue}" data-planejado="${planejado}" data-unidade="${esc(embalagem(produto))}" oninput="atualizarSobra(this)"${bloqueio}></td>
                                 <td class="num sobra"></td>
                                 <td><input class="input-tabela input-texto" type="text" data-campo="observacoes" placeholder="Opcional" value="${esc(registro.observacoes)}"${bloqueio}></td>
                             </tr>`;
@@ -779,6 +780,7 @@ function salvarLanche(form) {
 function preencherEmpenho(form, registro) {
     const itens = registro ? itensEmpenho(registro.id) : [];
     if (registro) preencherCampos(form, registro);
+    form.elements.data_final.min = registro ? registro.data_inicial : "";
     definirLinhas(form, itens.length || 1).forEach((linha, i) => itens[i] && preencherLinha(linha, itens[i]));
 }
 
@@ -809,6 +811,24 @@ function salvarSolicitacao(form) {
 function mostrarUnidade(select) {
     el("produto-unidade").textContent = select.value ? unidadeAlimento(Number(select.value)) : "—";
 }
+
+function mostrarUnidadeLinha(select) {
+    select.closest(".linha-item").querySelector("[data-unidade]").textContent = select.value ? unidadeAlimento(Number(select.value)) : "";
+}
+
+// Máscaras de digitação; o banco também confere e padroniza esses formatos.
+const mascaras = {
+    cnpj: valor => {
+        const c = valor.toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 14);
+        return [c.slice(0, 2), c.slice(2, 5), c.slice(5, 8)].filter(Boolean).join(".") + (c.length > 8 ? `/${c.slice(8, 12)}` : "") + (c.length > 12 ? `-${c.slice(12)}` : "");
+    },
+    telefone: valor => {
+        const d = valor.replace(/\D/g, "").slice(0, 11);
+        if (d.length <= 2) return d && `(${d}`;
+        const meio = d.length > 10 ? 5 : 4;
+        return `(${d.slice(0, 2)}) ${d.slice(2, 2 + meio)}${d.length > 2 + meio ? `-${d.slice(2 + meio)}` : ""}`;
+    }
+};
 
 function preencherItensEmpenho(form) {
     const empenho = buscar(dados.empenho, Number(form.elements.fk_empenho.value));
@@ -855,6 +875,7 @@ function ajustarReferencia(linha) {
     conversao.disabled = referencia.value !== "subitens";
     conversao.placeholder = produto && produto.quant_subitens ? `Auto (${num(produto.quant_subitens)})` : "Auto";
     if (conversao.disabled) conversao.value = "";
+    linha.querySelector("[data-unidade]").textContent = unidadeConsumo(referencia.value, produto);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1017,6 +1038,8 @@ document.addEventListener("submit", evento => {
 });
 
 document.addEventListener("input", evento => {
+    const mascara = mascaras[evento.target.dataset.mascara];
+    if (mascara) evento.target.value = mascara(evento.target.value);
     if (evento.target.closest(".busca")) filtrar(evento.target.closest("[data-filtragem]"));
 });
 

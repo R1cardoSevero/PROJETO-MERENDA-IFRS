@@ -22,10 +22,12 @@
 //
 // Regras garantidas pelo banco (violações lançam banco.ErroBanco, com mensagem para o usuário):
 // - campos obrigatórios, tipos, valores permitidos e campos únicos (CNPJ, número do empenho);
+// - CNPJ (numérico ou alfanumérico) com dígitos verificadores, telefone com DDD e e-mail;
 // - chaves estrangeiras: não grava referência a registro inexistente e não exclui registro em uso;
 //   excluir um cardápio, lanche, empenho ou lanche agendado exclui junto os itens dele;
 // - restrição 1 da especificação: lanche que já foi entregue não pode mais ser alterado;
-// - entrega de lanche agendado já registrada não pode mais ser alterada;
+// - entrega de lanche agendado já registrada não pode mais ser alterada, e não entrega mais
+//   lanches (nem produtos) do que o planejado;
 // - itens do lanche só usam produtos de alimentos que estão no cardápio do lanche;
 // - a entrega solicitada ao fornecedor não passa do saldo do item de empenho;
 // - estoque: o recebimento de uma entrega de empenho soma no total_estoque do produto e no
@@ -185,6 +187,8 @@ const banco = (() => {
                 if (anterior) exigirEntregaAberta(t, anterior);
                 if (agendado.situacao === "entregue" && agendado.quant_entregue === null)
                     falhar("Informe a quantidade de lanches entregues para registrar a entrega.");
+                if (agendado.quant_entregue > agendado.quant_prevista)
+                    falhar(`A quantidade de lanches entregues (${agendado.quant_entregue}) não pode passar da prevista (${agendado.quant_prevista}).`);
             },
             depoisDeSalvar: (t, agendado, id, anterior) => {
                 // libera a gravação dos itens da entrega nesta mesma transação
@@ -212,6 +216,11 @@ const banco = (() => {
                 const itemLanche = await t.obter("item_lanche", item.fk_item_lanche);
                 if (itemLanche.fk_lanche !== agendado.fk_lanche)
                     falhar(`O item de lanche ${itemLanche.id} não faz parte do lanche ${agendado.fk_lanche}, que é o lanche agendado.`);
+                // a tela mostra o planejado com 1 casa decimal; a folga de 0,05 cobre esse arredondamento
+                const produto = await t.obter("produto", itemLanche.fk_produto);
+                const planejado = consumoPorLanche(itemLanche, produto) * agendado.quant_prevista;
+                if (item.quant_entregue > planejado + 0.05 + 1e-9)
+                    falhar(`"${await nomeDoProduto(t, produto)}": a quantidade entregue (${item.quant_entregue}) passa da planejada para este lanche (${Math.round(planejado * 10) / 10}).`);
             },
             depoisDeSalvar: async (t, item, chave, anterior) => {
                 const usado = arred(item.quant_entregue - (anterior?.quant_entregue ?? 0));
@@ -227,9 +236,9 @@ const banco = (() => {
             rotulo: "fornecedor",
             campos: {
                 nome: texto(),
-                cnpj: texto({ unico: true }),
-                telefone: texto({ opcional: true }), // tela
-                email: texto({ opcional: true })     // tela
+                cnpj: texto({ unico: true, formatar: formatarCnpj, validar: valor => cnpjValido(valor) || "deve ser um CNPJ válido (confira os números e os dígitos verificadores)" }),
+                telefone: texto({ opcional: true, formatar: formatarTelefone, validar: valor => /^\([1-9]\d\) \d{4,5}-\d{4}$/.test(valor) || "deve ter DDD e 8 ou 9 dígitos, como (51) 3333-4444" }), // tela
+                email: texto({ opcional: true, validar: valor => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(valor) || "deve ser um e-mail válido, como nome@empresa.com.br" }) // tela
             }
         },
         empenho: {
@@ -341,6 +350,39 @@ const banco = (() => {
         return `${alimento.nome} · ${produto.descricao}`;
     }
 
+    // Quantas unidades do produto (embalagens) um lanche consome, conforme a referência de consumo.
+    function consumoPorLanche(item, produto) {
+        if (item.referencia_consumo === "inteiro") return item.quant_consumida;
+        if (item.referencia_consumo === "unidade_base") return item.quant_consumida / produto.quant_unit_base;
+        return item.quant_consumida / (item.conversao_subitens || produto.quant_subitens);
+    }
+
+    // CNPJ numérico ou alfanumérico (adotado pela Receita Federal a partir de julho de 2026):
+    // 12 caracteres [0-9A-Z] seguidos de 2 dígitos verificadores. No cálculo dos dígitos, cada
+    // caractere vale o seu código ASCII menos 48 (os números continuam valendo 0 a 9).
+    function formatarCnpj(valor) {
+        const c = valor.toUpperCase().replace(/[^0-9A-Z]/g, "");
+        return c.length === 14 ? `${c.slice(0, 2)}.${c.slice(2, 5)}.${c.slice(5, 8)}/${c.slice(8, 12)}-${c.slice(12)}` : valor;
+    }
+
+    function cnpjValido(valor) {
+        const c = valor.replace(/[./-]/g, "");
+        if (!/^[0-9A-Z]{12}\d{2}$/.test(c) || /^(.)\1+$/.test(c)) return false;
+        const pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+        const digito = tamanho => {
+            const resto = [...c.slice(0, tamanho)].reduce((soma, caractere, i) => soma + (caractere.charCodeAt(0) - 48) * pesos[i + 13 - tamanho], 0) % 11;
+            return resto < 2 ? 0 : 11 - resto;
+        };
+        return digito(12) === Number(c[12]) && digito(13) === Number(c[13]);
+    }
+
+    function formatarTelefone(valor) {
+        const d = valor.replace(/\D/g, "");
+        if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+        if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+        return valor;
+    }
+
     // Quantidade do item de empenho já solicitada ao fornecedor e ainda não entregue.
     async function aReceber(t, idItem, excetoEntrega) {
         return (await t.buscar("agenda_entrega_empenho", "fk_item_empenho", idItem))
@@ -369,6 +411,10 @@ const banco = (() => {
         if (def.tipo === "data" && !dataValida(valor)) invalido("deve ser uma data válida no formato AAAA-MM-DD");
         if (def.tipo === "opcao" && !def.valores.includes(valor)) invalido(`deve ser um destes valores: ${def.valores.join(", ")}`);
         if (def.tipo === "fk" && !Number.isInteger(valor)) invalido("deve ser o id (número inteiro) de um registro");
+        if (def.validar) {
+            const resultado = def.validar(valor);
+            if (resultado !== true) invalido(resultado);
+        }
         if (def.tipo === "numero") {
             if (typeof valor !== "number" || !Number.isFinite(valor)) invalido("deve ser um número");
             if (def.inteiro && !Number.isInteger(valor)) invalido("deve ser um número inteiro");
@@ -394,6 +440,7 @@ const banco = (() => {
         }
         for (const [campo, def] of Object.entries(tabela.campos)) {
             let valor = typeof registro[campo] === "string" ? registro[campo].trim() : registro[campo];
+            if (def.formatar && typeof valor === "string" && valor) valor = def.formatar(valor);
             if (vazio(valor) && def.padrao !== undefined) valor = def.padrao;
             if (vazio(valor)) {
                 if (!def.opcional) falhar(`${titulo(nome)}: o campo "${campo}" é obrigatório.`);
@@ -584,6 +631,7 @@ const banco = (() => {
     return {
         ErroBanco,
         tabelas: Object.keys(esquema),
+        consumoPorLanche,
         listar: nome => transacao(t => t.listar(nome), "readonly"),
         listarTudo: () => transacao(async t => {
             const tudo = {};

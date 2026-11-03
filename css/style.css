@@ -290,21 +290,6 @@ textarea {
     color: var(--azul-texto);
 }
 
-.notificacao {
-    position: relative;
-}
-
-.notificacao i {
-    position: absolute;
-    top: 8px;
-    right: 9px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--laranja-500);
-    border: 2px solid #fff;
-}
-
 .usuario {
     display: flex;
     align-items: center;
@@ -1835,11 +1820,15 @@ textarea {
 }
 
 .segmentado label {
+    position: relative;
     flex: 1;
 }
 
 .segmentado input {
     position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     opacity: 0;
     pointer-events: none;
 }
@@ -1857,9 +1846,9 @@ textarea {
 }
 
 .segmentado input:checked + span {
-    color: var(--azul-700);
-    background: var(--superficie);
-    box-shadow: 0 1px 3px rgba(28, 45, 70, .12);
+    color: #fff;
+    background: var(--azul-700);
+    box-shadow: 0 1px 3px rgba(28, 45, 70, .2);
 }
 
 .segmentado input:focus-visible + span {
@@ -1936,6 +1925,8 @@ textarea {
 .modal {
     width: min(620px, calc(100% - 32px));
     max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
+    overflow: hidden;
     margin: auto;
     border: none;
     border-radius: 18px;
@@ -1966,6 +1957,7 @@ textarea {
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
 }
 
 .modal-topo {
@@ -2033,6 +2025,16 @@ textarea {
     transform: none;
 }
 
+/* Itens de grade podem encolher abaixo do texto que contêm (o texto quebra ou vira "…") */
+.grade-2 > *,
+.entrega-layout > *,
+.recebimentos > *,
+.cartoes > *,
+.stats > *,
+.estoque-grade > * {
+    min-width: 0;
+}
+
 /* Estados vazios, exclusão e erros (dados vindos do banco) */
 .cartoes > .vazio,
 .recebimentos > .vazio,
@@ -2074,6 +2076,16 @@ button.lanche-chip:hover {
 .btn-perigo:hover {
     background: var(--vermelho-100);
     border-color: var(--vermelho-100);
+}
+
+.unidade-campo {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--texto-3);
+}
+
+.unidade-campo:not(:empty)::before {
+    content: "em ";
 }
 
 .aviso-erro {
@@ -2243,5 +2255,38 @@ button.lanche-chip:hover {
         left: 16px;
         right: 16px;
         bottom: 16px;
+    }
+
+    .semana-nav {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .semana-nav strong {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .semana-nav .btn {
+        flex-basis: 100%;
+        margin-left: 0;
+    }
+
+    .recebimento-acoes {
+        flex-wrap: wrap;
+    }
+
+    .recebimento-acoes .btn {
+        flex: 1 1 100%;
+    }
+
+    .modal {
+        width: calc(100% - 24px);
+    }
+
+    .modal,
+    .modal form {
+        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
     }
 }
